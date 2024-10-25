@@ -12,13 +12,13 @@ client.connect();
 
 //Show data
 
-client.query(`select * from public.users`,(err, res)=>{
-  if(!err){
-    console.log(res.rows);
-  }else{
-    console.log("not connected db !!");
-  }
-})
+// client.query(`select * from public.products`,(err, res)=>{
+//   if(!err){
+//     console.log(res.rows);
+//   }else{
+//     console.log("not connected db !!");
+//   }
+// })
 
 
 // INSERT data in pg    
@@ -41,12 +41,48 @@ client.query(`select * from public.users`,(err, res)=>{
 })*/
 
 //delete data
-client.query('delete from users where user_id=4',(err,res)=>{
+/*client.query('delete from users where user_id=4',(err,res)=>{
   if(!err){
     console.log("deleted successfully");
   }else{
     console.log("Error !!");
   }
-})
 
-client.end;
+})*/
+
+/*
+// Function to insert records are product table
+async function insertProducts() {
+  try {
+    await client.query('BEGIN');
+
+    const insertQuery = 'INSERT INTO products (product_name, price, stock_quantity) VALUES ($1, $2, $3)';
+    
+    // Loop to insert 100 records
+    for (let i = 1; i <= 100; i++) {
+      const productName = `Product ${i}`;  // Name of the product
+      const price = (Math.random() * 100).toFixed(2);  // Random price between 0 and 100
+      const stockQuantity = Math.floor(Math.random() * 100);  // Random stock quantity between 0 and 99
+      
+      await client.query(insertQuery, [productName, price, stockQuantity]);
+    }
+
+    // Commit the transaction
+    await client.query('COMMIT');
+    console.log('100 records inserted successfully!');
+    
+  } catch (err) {
+    // Rollback in case of an error
+    await client.query('ROLLBACK');
+    console.error('Error inserting records:', err.message);
+    
+  } finally {
+    await client.end();  // Close the database connection
+  }
+}
+insertProducts();
+*/
+
+//client.end;
+
+module.exports={client};  //this module are use to ready for another file
