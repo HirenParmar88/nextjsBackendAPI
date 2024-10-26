@@ -10,16 +10,15 @@ const client = new Client({
 })
 client.connect();
 
-//Show data
+//Show data users/products/accessories tables
 
-client.query(`select * from public.users`,(err, res)=>{
+client.query(`select * from public.accessories`,(err, res)=>{
   if(!err){
     console.log(res.rows);
   }else{
     console.log("not connected db !!");
   }
 })
-
 
 // INSERT data in pg    
 /*client.query(`insert into public.users("user_id","username","email","password") values (4,'ravi','ravi12@gmail.com','ravi12')`,(err,res)=>{
@@ -55,13 +54,13 @@ client.query(`select * from public.users`,(err, res)=>{
 async function insertUser(){
   try{
     await client.query('BEGIN');
-    const insertData='INSERT INTO users(username,email,password) VALUES ($1, $2, $3)';
+    const insertData='INSERT INTO users(username,email) VALUES ($1, $2)';
     for(let i=1; i<=100; i++){
       const username=`users ${i}`;
       const email=(Math.random() * 100);
-      const password = Math.floor(Math.random()*100);
+      //const password = Math.floor(Math.random()*100);
 
-      await client.query(insertData, [username, email, password]);
+      await client.query(insertData, [username, email]);
     }
   // Commit the transaction
   await client.query('COMMIT');
@@ -73,7 +72,7 @@ async function insertUser(){
     console.error('Error inserting records:', err.message);
   
   } finally {
-    await client.end();  // Close the database connection
+    //await client.end();  // Close the database connection
   }
 }
 insertUser();
@@ -85,15 +84,15 @@ async function insertProducts() {
   try {
     await client.query('BEGIN');
 
-    const insertQuery = 'INSERT INTO products (product_name, price, stock_quantity) VALUES ($1, $2, $3)';
+    const insertQuery = 'INSERT INTO products (product_name, description, price) VALUES ($1, $2, $3)';
     
     // Loop to insert 100 records
     for (let i = 1; i <= 100; i++) {
-      const productName = `Product ${i}`;  // Name of the product
+      const product_name = `Product ${i}`;  // Name of the product
       const price = (Math.random() * 100).toFixed(2);  // Random price between 0 and 100
-      const stockQuantity = Math.floor(Math.random() * 100);  // Random stock quantity between 0 and 99
+      const description = Math.floor(Math.random() * 100);  // Random stock quantity between 0 and 99
       
-      await client.query(insertQuery, [productName, price, stockQuantity]);
+      await client.query(insertQuery, [product_name, description, price]);
     }
 
     // Commit the transaction
@@ -110,6 +109,33 @@ async function insertProducts() {
   }
 }
 insertProducts();
+*/
+
+/*
+//insert data in accessories table using for loop and function (Note : this code are run one time !!)
+async function insertAccessories(){
+  console.log('function calling...')
+  try{
+      await client.query('BEGIN');
+      const insertdata='INSERT INTO accessories(accessory_name, description, price) VALUES ($1, $2, $3)';
+      for(let i=1; i<=100; i++){
+        const accessory_name=`accessories ${i}`;
+        const description=(Math.random()*100);
+        //const product_id=(Math.random()*100);
+        const price=Math.floor(Math.random()*100);
+
+        await client.query(insertdata,[accessory_name,description,price]);
+      }
+      await client.query('COMMIT');
+      console.log("record inserted successfully ");
+  }catch(err){
+    await client.query('ROLLBACK');
+    console.error('error !!',err.message);
+  }finally{
+    await client.end();
+  }
+}
+insertAccessories();
 */
 
 //client.end;
