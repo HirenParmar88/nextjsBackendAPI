@@ -12,13 +12,13 @@ client.connect();
 
 //Show data
 
-// client.query(`select * from public.products`,(err, res)=>{
-//   if(!err){
-//     console.log(res.rows);
-//   }else{
-//     console.log("not connected db !!");
-//   }
-// })
+client.query(`select * from public.users`,(err, res)=>{
+  if(!err){
+    console.log(res.rows);
+  }else{
+    console.log("not connected db !!");
+  }
+})
 
 
 // INSERT data in pg    
@@ -49,6 +49,35 @@ client.connect();
   }
 
 })*/
+
+/*
+// Function to insert 100 data in users table
+async function insertUser(){
+  try{
+    await client.query('BEGIN');
+    const insertData='INSERT INTO users(username,email,password) VALUES ($1, $2, $3)';
+    for(let i=1; i<=100; i++){
+      const username=`users ${i}`;
+      const email=(Math.random() * 100);
+      const password = Math.floor(Math.random()*100);
+
+      await client.query(insertData, [username, email, password]);
+    }
+  // Commit the transaction
+  await client.query('COMMIT');
+  console.log('100 records inserted successfully!');
+  
+  } catch (err) {
+    // Rollback in case of an error
+    await client.query('ROLLBACK');
+    console.error('Error inserting records:', err.message);
+  
+  } finally {
+    await client.end();  // Close the database connection
+  }
+}
+insertUser();
+*/
 
 /*
 // Function to insert records are product table
