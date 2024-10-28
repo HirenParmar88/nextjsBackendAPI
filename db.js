@@ -12,13 +12,15 @@ client.connect();
 
 //Show data users/products/accessories tables
 
-client.query(`select * from public.accessories`,(err, res)=>{
-  if(!err){
-    console.log(res.rows);
-  }else{
-    console.log("not connected db !!");
-  }
-})
+// client.query(`select * from public.accessories`,(err, res)=>{
+//   if(!err){
+//     console.log(res.rows);
+//   }else{
+//     console.log("not connected db !!");
+//   }
+// })
+
+
 
 // INSERT data in pg    
 /*client.query(`insert into public.users("user_id","username","email","password") values (4,'ravi','ravi12@gmail.com','ravi12')`,(err,res)=>{
