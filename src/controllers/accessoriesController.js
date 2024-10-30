@@ -1,5 +1,7 @@
 
-import client from './../../db.js';
+//import client from './../../db.js';
+import { PrismaClient } from "@prisma/client";
+const prisma=new PrismaClient();
 
 const getAcce= async(req,res)=>{
     const page=parseInt(req.query.page) || 1;
@@ -7,14 +9,18 @@ const getAcce= async(req,res)=>{
     console.log('page and limit :',page, limit)
     const offset=(page-1)*limit;
     try{
-      const result=await client.query("select * from accessories limit $1 offset $2",[limit,offset])
+      const totalAccessories=await prisma.accessory.count();
+      const result=await prisma.accessory.findMany({
+        skip:offset,
+        take:limit,
+      })
       return res.json({
         currentPage: page,
         pageSize: limit,
         code: 200,
         sucess: true,
-        totalAccessories:result.rowCount,
-        accessories: result.rows
+        totalAccessories,
+        accessories: result
       });
     }catch(err){
       console.error('error !! can not find accessories',err);
@@ -23,15 +29,17 @@ const getAcce= async(req,res)=>{
   }
 
 const addAccessories= async (req, res) => {
-    const {accessory_name, description, price, product_id }= req.body;
-    if(!accessory_name || !description || !price || product_id ){
+    const {accessory_name, product_id }= req.body;
+    if(!accessory_name || product_id ){
       //return res.err(400).json({error: "error message !!"})
     }
     try {
-      const result = await client.query(
-        `INSERT INTO accessories (accessory_name, description, price, product_id ) VALUES ($1, $2, $3, $4) RETURNING *;`,
-        [accessory_name, description,price,product_id]
-      );
+      const result = await prisma.accessory.create({
+        data:{
+          name:accessory_name,
+          productId:product_id,
+        }
+      })
       return res.json({
         code : 200,
         sucess : true,
@@ -47,13 +55,20 @@ const addAccessories= async (req, res) => {
 const updateAccessories= async(req,res)=>{
     const id=req.query.id;
     const{ accessory_name }=req.body;
-    if(!id || !accessory_name){
+    if(!id || !accessory_name ){
       //
     }
     console.log('id and accessory_name',id,accessory_name);
     try{
-      const updateAccessories= await client.query(`UPDATE accessories SET accessory_name=$1 WHERE id=$2`,[accessory_name, id]);
-  
+      const updateAccessories= await prisma.accessory.update({
+        where:{
+          id,
+        },
+        data:{
+          name:accessory_name,
+          //productId:product_id,
+        }
+      })
       return res.json({ 
         code : 200,
         sucess : true,
@@ -72,7 +87,11 @@ const deleteAccessories= async(req,res)=>{
       //
     }
     try{
-      const delAccessories=await client.query(`delete from accessories where id=$1`,[id]);
+      const delAccessories=await prisma.accessory.delete({
+        where:{
+          id
+        }
+      })
       return res.json({ 
         code: 200,
         sucess: true,

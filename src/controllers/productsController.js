@@ -1,4 +1,6 @@
-import client from "./../../db.js";
+//import client from "./../../db.js";
+import { PrismaClient } from "@prisma/client";
+const prisma=new PrismaClient();
 
 //app.get /product
 const getProduct=async (req, res) => {
@@ -8,15 +10,19 @@ const getProduct=async (req, res) => {
     
     const offset = (page - 1) * limit;  // Calculate offset
     try {
-      const result = await client.query("select * from products limit $1 offset $2", [limit, offset]) // Fetch paginated products
+      const totalProducts= await prisma.product.count();
+      const result = await prisma.product.findMany({
+        skip:offset,
+        take:limit,
+      }) // Fetch paginated products
       // Send response
       return res.json({
         currentPage: page,
         pageSize: limit,
         code : 200,
         sucess : true,
-        totalProducts: result.rowCount,
-        products: result.rows,
+        totalProducts,
+        products: result,
       });
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -31,10 +37,22 @@ const addProduct= async (req, res) => {
       return res.err(400).json({error: "error message !!"})
     }
     try {
-      const result = await client.query(
-        `INSERT INTO products (product_name, description, price) VALUES ($1, $2, $3) RETURNING *;`,
-        [product_name, description,price]
-      );
+      const user=await prisma.user.findFirst({
+          where:{
+              id:10
+            },
+          select:{
+              id:true,
+            }
+      })
+      const result = await prisma.product.create({
+        data:{
+          product_name:product_name,
+          price:price,
+          description:description,
+          userId: user.id
+        }
+      })
       return res.json({
         code : 200,
         sucess : true,
@@ -47,17 +65,26 @@ const addProduct= async (req, res) => {
     }
   }
 
-  //app.put /product
+//app.put /product
 const updProduct= async (req,res)=>{
     const id = req.query.id
-    const{ product_name }=req.body;
-    if(!product_name || !id){
+    const{ product_name, price, description }=req.body;
+    if(!product_name || !id || price || description){
+
       //
     }
     console.log("id and productName ", id, product_name)
     try{
-      const updateProduct= await client.query(`UPDATE products SET product_name=$1 WHERE id=$2`,[product_name, id]);
-  
+      const updateProduct= await prisma.product.update({
+        where:{
+          id: parseInt(id)
+        },
+        data:{
+          product_name:product_name,
+          price:price,
+          description:description
+        }
+      })
       return res.json({ 
         code : 200,
         sucess : true,
@@ -76,7 +103,11 @@ const deleteProducts= async(req,res)=>{
       //
     }
     try{
-      const delProducts=await client.query(`delete from products where id=$1`,[id]);
+      const delProducts=await prisma.product.delete({
+        where:{
+          id: parseInt(id),
+        }
+      })
       return res.json({ 
         code: 200,
         sucess: true,

@@ -7,6 +7,6 @@ const router=Router();
 router.get('/', getAcce)
 router.post('/', addAccessories)
 router.put('/', updateAccessories)
-router.delete('/', deleteAccessories)
+router.delete('/:id', deleteAccessories)
 
 export default router;
