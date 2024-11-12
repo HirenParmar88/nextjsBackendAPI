@@ -20,7 +20,7 @@ const getProduct=async (req, res) => {
         currentPage: page,
         pageSize: limit,
         code : 200,
-        sucess : true,
+        success : true,
         totalProducts,
         products: result,
       });
@@ -55,7 +55,7 @@ const addProduct= async (req, res) => {
       })
       return res.json({
         code : 200,
-        sucess : true,
+        success : true,
         data : result.rows,
         total : result.rowCount
       });
@@ -87,7 +87,7 @@ const updProduct= async (req,res)=>{
       })
       return res.json({ 
         code : 200,
-        sucess : true,
+        success : true,
         data : updateProduct.rows,
         total : updateProduct.rowCount
       });
@@ -110,13 +110,13 @@ const deleteProducts= async(req,res)=>{
       })
       return res.json({ 
         code: 200,
-        sucess: true,
+        success: true,
         data: delProducts.rows,
         total: delProducts.rowCount
       })
     }catch(err){
       console.error('products not deleted !!',err);
     }
-    return res.status(200).json({ sucess: true })
+    return res.status(200).json({ success: true })
   }
   export { getProduct, addProduct, updProduct, deleteProducts}

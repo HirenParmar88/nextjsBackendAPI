@@ -24,7 +24,7 @@ const getUsers = async (req, res) => {
       currentPage: page,
       pageSize: limit,
       code: 200,
-      sucess: true,
+      success: true,
       totalUsers,
       users: result,
     });
@@ -48,7 +48,7 @@ const addUsers = async (req, res) => {
     });
     return res.json({
       code: 200,
-      sucess: true,
+      success: true,
       data: result.rows,
       total: result.rowCount,
     });
@@ -79,7 +79,7 @@ const upUsers = async (req, res) => {
 
     return res.json({
       code: 200,
-      sucess: true,
+      success: true,
       data: updateUsers.rows,
       //total: updateUsers.rowCount,
       total: countUpdate
@@ -112,7 +112,7 @@ const deleteUsers = async (req, res) => {
 
     return res.json({
       code: 200,
-      sucess: true,
+      success: true,
       data: delUsers.rows,
       total: delUsers.rowCount,
     });

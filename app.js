@@ -3,16 +3,20 @@
 
 import userRoutes from './src/routes/users.js';
 import products from './src/routes/products.js';
-import accessories from './src/routes/accessories.js'
-
+import accessories from './src/routes/accessories.js';
+import cors from 'cors';
 import express, { json } from 'express';
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 
 //Route 
 app.use(json());
+app.use(cors());
 
 //define routes
+app.get('/',async (req,res)=>{
+  res.send("Surver is running...")
+})
 app.use('/users', userRoutes)
 app.use('/products', products)
 app.use('/accessories', accessories)

@@ -18,7 +18,7 @@ const getAcce= async(req,res)=>{
         currentPage: page,
         pageSize: limit,
         code: 200,
-        sucess: true,
+        success: true,
         totalAccessories,
         accessories: result
       });
@@ -42,7 +42,7 @@ const addAccessories= async (req, res) => {
       })
       return res.json({
         code : 200,
-        sucess : true,
+        success : true,
         data : result.rows,
         total : result.rowCount
       });
@@ -71,7 +71,7 @@ const updateAccessories= async(req,res)=>{
       })
       return res.json({ 
         code : 200,
-        sucess : true,
+        success : true,
         data : updateAccessories.rows,
         total : updateAccessories.rowCount
       });
@@ -94,14 +94,14 @@ const deleteAccessories= async(req,res)=>{
       })
       return res.json({ 
         code: 200,
-        sucess: true,
+        success: true,
         data: delAccessories.rows,
         total: delAccessories.rowCount
       })
     }catch(err){
       console.error('accessories not deleted !!',err);
     }
-    //return res.status(200).json({ sucess: true })
+    //return res.status(200).json({ success: true })
   }
   
 export {getAcce, addAccessories, updateAccessories, deleteAccessories}
