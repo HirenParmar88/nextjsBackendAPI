@@ -37,7 +37,7 @@ const getUsers = async (req, res) => {
 const addUsers = async (req, res) => {
   const { username, email } = req.body;
   if (!username || !email) {
-    return res.err(400).json({ error: "error message !!" });
+    return res.status(400).json({ error: "error message !!" });
   }
   try {
     const result = await prisma.user.create({

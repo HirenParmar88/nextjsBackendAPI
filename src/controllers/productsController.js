@@ -34,7 +34,7 @@ const getProduct=async (req, res) => {
 const addProduct= async (req, res) => {
     const {product_name, description, price}= req.body;
     if(!product_name || !description || !price){
-      return res.err(400).json({error: "error message !!"})
+      return res.status(400).json({error: "error message !!"})
     }
     try {
       const user=await prisma.user.findFirst({
