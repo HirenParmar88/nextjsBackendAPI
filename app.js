@@ -1,3 +1,5 @@
+//app.js
+
 // Import your database client
 //entry point app.js
 
@@ -12,6 +14,9 @@ const PORT = 5000;
 //Route 
 app.use(json());
 app.use(cors());
+// app.use(cors({
+//   origin: ['http://127.0.0.1:3000', 'http://localhost:3000']
+// }));
 
 //define routes
 app.get('/',async (req,res)=>{

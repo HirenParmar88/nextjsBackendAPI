@@ -3,17 +3,22 @@
 import { PrismaClient } from "@prisma/client";
 const prisma=new PrismaClient();
 
-const getAcce= async(req,res)=>{
+const getAccessories= async(req,res)=>{
     const page=parseInt(req.query.page) || 1;
     const limit=parseInt(req.query.limit) || 10;
-    console.log('page and limit :',page, limit)
+
+    //console.log('page and limit :',page, limit)
     const offset=(page-1)*limit;
     try{
       const totalAccessories=await prisma.accessory.count();
       const result=await prisma.accessory.findMany({
         skip:offset,
         take:limit,
+        orderBy: {
+          createdAt: 'desc'
+        }
       })
+      //console.log(result)
       return res.json({
         currentPage: page,
         pageSize: limit,
@@ -30,21 +35,23 @@ const getAcce= async(req,res)=>{
 
 const addAccessories= async (req, res) => {
     const {accessory_name, product_id }= req.body;
+    
     if(!accessory_name || product_id ){
-      //return res.err(400).json({error: "error message !!"})
+      console.log('accessories name and product id is required !!')
     }
     try {
       const result = await prisma.accessory.create({
         data:{
           name:accessory_name,
-          productId:product_id,
+          productId:parseInt(product_id)
         }
       })
+      console.log(result)
+      
       return res.json({
         code : 200,
         success : true,
-        data : result.rows,
-        total : result.rowCount
+        message: 'accessory added'
       });
     } catch (err) {
       console.error("Error adding accessories:", err);
@@ -84,24 +91,29 @@ const deleteAccessories= async(req,res)=>{
     console.log('parameter deleted:',req.params);
     const { id } = req.params;
     if(!id){
-      //
+      console.log('id is required !!')
     }
     try{
-      const delAccessories=await prisma.accessory.delete({
+      const delAccessories=await prisma.accessory.deleteMany({
         where:{
           id
         }
-      })
+      });
+      if (delAccessories.count === 0) {
+        return res.status(404).json({
+          code: 404,
+          success: false,
+          message: 'Accessories not found or already deleted.',
+        });
+      }
       return res.json({ 
         code: 200,
         success: true,
-        data: delAccessories.rows,
-        total: delAccessories.rowCount
+        message: "accessory deleted"
       })
     }catch(err){
       console.error('accessories not deleted !!',err);
     }
-    //return res.status(200).json({ success: true })
   }
   
-export {getAcce, addAccessories, updateAccessories, deleteAccessories}
+export {getAccessories, addAccessories, updateAccessories, deleteAccessories}

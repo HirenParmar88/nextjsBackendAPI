@@ -6,7 +6,7 @@ const prisma=new PrismaClient();
 const getProduct=async (req, res) => {
     const page = parseInt(req.query.page) || 1;  // Default to page 1
     const limit = parseInt(req.query.limit) || 10;  // Default to 10 items per page
-    console.log('page and limit ', page , limit)
+    //console.log('page and limit ', page , limit)
     
     const offset = (page - 1) * limit;  // Calculate offset
     try {
@@ -14,6 +14,9 @@ const getProduct=async (req, res) => {
       const result = await prisma.product.findMany({
         skip:offset,
         take:limit,
+        orderBy:{
+          id: 'desc',
+        },
       }) // Fetch paginated products
       // Send response
       return res.json({
@@ -100,14 +103,21 @@ const deleteProducts= async(req,res)=>{
     console.log('parameter',req.params);
     const { id } = req.params;
     if(!id){
-      //
+      console.log('id is required !!')
     }
     try{
-      const delProducts=await prisma.product.delete({
+      const delProducts=await prisma.product.deleteMany({
         where:{
           id: parseInt(id),
         }
       })
+      if (delProducts.count === 0) {
+        return res.status(404).json({
+          code: 404,
+          success: false,
+          message: 'product not found or already deleted.',
+        });
+      }
       return res.json({ 
         code: 200,
         success: true,
@@ -119,4 +129,5 @@ const deleteProducts= async(req,res)=>{
     }
     return res.status(200).json({ success: true })
   }
+  
   export { getProduct, addProduct, updProduct, deleteProducts}

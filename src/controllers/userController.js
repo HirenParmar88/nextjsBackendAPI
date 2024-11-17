@@ -1,6 +1,5 @@
 //import client from "./../../db.js";
 import { PrismaClient } from "@prisma/client";
-
 const prisma = new PrismaClient();
 
 //GET User usign Prisma
@@ -8,7 +7,7 @@ const prisma = new PrismaClient();
 const getUsers = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  console.log("page and limit :", page, limit);
+  //console.log("page and limit :", page, limit);
 
   const offset = (page - 1) * limit;
   try {
@@ -18,8 +17,13 @@ const getUsers = async (req, res) => {
     const result = await prisma.user.findMany({
       skip: offset,
       take: limit,
+      orderBy:{
+        id:'desc',
+      }
+      
     });
-    console.log(result);
+    //console.log(result);
+
     return res.json({
       currentPage: page,
       pageSize: limit,
@@ -62,7 +66,7 @@ const upUsers = async (req, res) => {
   const id = req.query.id;
   const { username, email } = req.body;
   if (!username || !id || !email) {
-    //
+    console.log('is required !!!')
   }
   console.log("id user email", id, username, email);  //email -> Unique
   try {
@@ -82,7 +86,8 @@ const upUsers = async (req, res) => {
       success: true,
       data: updateUsers.rows,
       //total: updateUsers.rowCount,
-      total: countUpdate
+      total: countUpdate,
+      message:"users updated.."
     });
   } catch (err) {
     console.error("error to update users  !!", err);
@@ -105,10 +110,17 @@ const deleteUsers = async (req, res) => {
 
     const delUsers = await prisma.user.deleteMany({
       where: {
-        //id: parseInt(id),
         id: parseInt(id),
       },
     });
+
+    if (delUsers.count === 0) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'User not found or already deleted.',
+      });
+    }
 
     return res.json({
       code: 200,
