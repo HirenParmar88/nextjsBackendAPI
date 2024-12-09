@@ -17,8 +17,16 @@ model user {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   email     String   @unique
-  name      String
+  name      String    @unique
+  password  String    
+  jwtToken  String    @unique
+  role      Role    @default(user)
   products  product[] //  one to Many
+}
+
+enum Role {
+  user
+  admin
 }
 
 model product{

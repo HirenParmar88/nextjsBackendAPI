@@ -1,6 +1,9 @@
 //import client from "./../../db.js";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+import jwt from 'jsonwebtoken'; //ES7
+const {verify,decode,sign} = jwt;
+import { secretKey } from '../utils/constant.js';
 
 //GET User usign Prisma
 
@@ -38,18 +41,34 @@ const getUsers = async (req, res) => {
   }
 };
 
+// Add users Back-End APIs
 const addUsers = async (req, res) => {
-  const { username, email } = req.body;
-  if (!username || !email) {
+  const { username, email, password} = req.body;
+  if (!username || !email || !password ) {
+    console.log('username and password are required')
     return res.status(400).json({ error: "error message !!" });
   }
   try {
-    const result = await prisma.user.create({
+    const getUser = await prisma.user.findFirst({
+      where: {
+        name: username
+      }     
+    })
+    if(getUser) {
+      return res.status(409).json({
+        error: "User already exists"
+      })
+    }
+    //const token = sign({ username: result.name, role: result.role }, secretKey, { expiresIn: "1hr" })
+    const result = await prisma.user.createMany({
       data: {
         name: username,
         email,
+        password: password,
+        jwtToken: 'jwtToken'
       },
     });
+    //console.log("Authenticate users jwt token is :-", token)
     return res.json({
       code: 200,
       success: true,

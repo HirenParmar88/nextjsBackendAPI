@@ -6,8 +6,10 @@
 import userRoutes from './src/routes/users.js';
 import products from './src/routes/products.js';
 import accessories from './src/routes/accessories.js';
+import auth from './src/routes/auth.js';
 import cors from 'cors';
 import express, { json } from 'express';
+
 const app = express();
 const PORT = 5000;
 
@@ -21,11 +23,13 @@ app.use(cors());
 //define routes
 app.get('/',async (req,res)=>{
   res.send("Surver is running...")
+  
 })
+
 app.use('/users', userRoutes)
 app.use('/products', products)
 app.use('/accessories', accessories)
-
+app.use('/auth', auth)
 
 // Start the server
 app.listen(PORT, () => {

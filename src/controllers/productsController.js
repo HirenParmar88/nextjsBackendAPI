@@ -33,27 +33,27 @@ const getProduct=async (req, res) => {
     }
   }
 
-  //app.post /product
+//app.post /product
 const addProduct= async (req, res) => {
     const {product_name, description, price}= req.body;
     if(!product_name || !description || !price){
       return res.status(400).json({error: "error message !!"})
     }
     try {
-      const user=await prisma.user.findFirst({
-          where:{
-              id:10
-            },
-          select:{
-              id:true,
-            }
-      })
+      // const user=await prisma.user.findFirst({
+      //     where:{
+      //         id: req.user.id
+      //       },
+      //     select:{
+      //         id:true,
+      //       }
+      // })
       const result = await prisma.product.create({
         data:{
           product_name:product_name,
           price:price,
-          description:description,
-          userId: user.id
+          description: description,
+          userId: req.user.id
         }
       })
       return res.json({

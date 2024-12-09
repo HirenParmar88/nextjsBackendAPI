@@ -3,16 +3,43 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma= new PrismaClient();
 
+// function to generate a unique password
+function generatePassword(length) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const digits = "0123456789";
+    const specialChars = "!@#$%^&*()_+[]{}|;:,.<>?";
+    
+    let password = "";
+    
+    // Ensure at least one character from each set is included
+    password += chars[Math.floor(Math.random() * chars.length)];
+    password += digits[Math.floor(Math.random() * digits.length)];
+    password += specialChars[Math.floor(Math.random() * specialChars.length)];
+    
+    // Fill the rest of the password
+    const allChars = chars + digits + specialChars;
+    for (let i = 3; i < length; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+    
+    // Shuffle the password to randomize character order
+    return password.split('').sort(() => Math.random() - 0.5).join('');
+  }
+
 //insert 100 record using for loop
 // async function addUser(){
 //     try{
 //        for(let i=1; i<=100; i++){
 //         const name=`user ${i}`;
 //         const email=`user ${i}@gmail.com`;
+//         const password=generatePassword(8);   //generate 8 char password
+//         const jwtToken=`user_token ${i}`;
 //         await prisma.user.create({
 //             data:{
 //                 name: name,
 //                 email: email,
+//                 password: password,
+//                 jwtToken: jwtToken
 //             },
 //         });
 //       }
@@ -58,34 +85,34 @@ const prisma= new PrismaClient();
 // }
 // addProduct();
 
-async function addAccessory(){
-    try{
-        const product=await prisma.product.findFirst({
-            where:{
-               id:1
-            },
-            select:{
-                id:true,
-            }
-        })
-        if(!product){
-            console.log("product not found !!")
-        }
-       for(let i=1; i<=100; i++){
-        const name=`accessory ${i}`;
-        await prisma.accessory.create({
-            data:{
-                name,
-                productId:product.id
-            },
-        });
-    }
-    console.log('Accessory added successfully !!')
-    }catch(err){
-        console.log('Error !!',err)
-    }
-}
-addAccessory()
+// async function addAccessory(){
+//     try{
+//         const product=await prisma.product.findFirst({
+//             where:{
+//                id:1
+//             },
+//             select:{
+//                 id:true,
+//             }
+//         })
+//         if(!product){
+//             console.log("product not found !!")
+//         }
+//        for(let i=1; i<=100; i++){
+//         const name=`accessory ${i}`;
+//         await prisma.accessory.create({
+//             data:{
+//                 name,
+//                 productId:product.id
+//             },
+//         });
+//     }
+//     console.log('Accessory added successfully !!')
+//     }catch(err){
+//         console.log('Error !!',err)
+//     }
+// }
+// addAccessory()
 
 //Find user using pagination
 
