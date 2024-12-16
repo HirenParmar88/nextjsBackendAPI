@@ -41,7 +41,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-// Add users Back-End APIs
+// Add Users Back-End APIs
 const addUsers = async (req, res) => {
   const { username, email, password} = req.body;
   if (!username || !email || !password ) {
