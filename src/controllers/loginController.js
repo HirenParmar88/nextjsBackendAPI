@@ -25,7 +25,6 @@ const login=async(req,res)=>{
         });
 
         const plaintext = CryptoJS.AES.decrypt(result.password ,secretKey).toString(CryptoJS.enc.Utf8)
-        console.log(plaintext);
         
         console.log(result);
         if(password === plaintext){
