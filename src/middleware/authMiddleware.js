@@ -15,9 +15,8 @@ function verifyToken(req,res,next){
         if(err){
           res.send({result:"invalid token"})
         }else{
-          console.log("Auth data :",authData);
-          
-          req.user = authData;
+          console.log("Auth User :",authData);
+          //req.user = authData;
           next();
         }
       })

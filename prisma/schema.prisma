@@ -19,7 +19,7 @@ model user {
   email     String   @unique
   name      String    @unique
   password  String    
-  jwtToken  String    @unique
+  jwtToken  String?
   role      Role    @default(user)
   products  product[] //  one to Many
 }

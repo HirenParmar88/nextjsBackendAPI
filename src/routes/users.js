@@ -9,7 +9,7 @@ const router = Router();
 //router.get('/', getUsers)
 //router.post('/', addUsers)
 router.get('/', verifyToken, getUsers)
-router.post('/', verifyToken, addUsers)
+router.post('/', addUsers)
 router.put('/', verifyToken ,upUsers)
 router.delete('/:id', verifyToken, deleteUsers)
 

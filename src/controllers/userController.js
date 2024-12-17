@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 import jwt from 'jsonwebtoken'; //ES7
 const {verify,decode,sign} = jwt;
 import { secretKey } from '../utils/constant.js';
+import CryptoJS from "crypto-js";
 
 //GET User usign Prisma
 
@@ -43,7 +44,12 @@ const getUsers = async (req, res) => {
 
 // Add Users Back-End APIs
 const addUsers = async (req, res) => {
-  const { username, email, password} = req.body;
+  console.log(req.body);
+  
+  const { username, email, password} = req.body;  
+  const cipherText = CryptoJS.AES.encrypt(password,secretKey).toString()   //secretKey is key
+  console.log("cipher text", cipherText);
+  
   if (!username || !email || !password ) {
     console.log('username and password are required')
     return res.status(400).json({ error: "error message !!" });
@@ -60,12 +66,12 @@ const addUsers = async (req, res) => {
       })
     }
     //const token = sign({ username: result.name, role: result.role }, secretKey, { expiresIn: "1hr" })
-    const result = await prisma.user.createMany({
+
+    const result = await prisma.user.create({
       data: {
         name: username,
         email,
-        password: password,
-        jwtToken: 'jwtToken'
+        password: cipherText,
       },
     });
     //console.log("Authenticate users jwt token is :-", token)
@@ -81,6 +87,7 @@ const addUsers = async (req, res) => {
   }
 };
 
+//Update Users APIs
 const upUsers = async (req, res) => {
   const id = req.query.id;
   const { username, email } = req.body;
@@ -113,6 +120,7 @@ const upUsers = async (req, res) => {
   }
 };
 
+//Delete Users APIs
 const deleteUsers = async (req, res) => {
   //console.log("body ", req.body)
   console.log("pram", req.params);

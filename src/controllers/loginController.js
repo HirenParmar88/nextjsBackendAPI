@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 import jwt from 'jsonwebtoken'; //ES7
 const {verify,decode,sign} = jwt;
 import { secretKey } from '../utils/constant.js';
+import CryptoJS from "crypto-js";
 
 //GET Apis 
 const login=async(req,res)=>{
@@ -12,22 +13,22 @@ const login=async(req,res)=>{
     console.log('log in APIS ..',req.body)
     //console.log('username :', username)
     //console.log('password :', password)
+    
     console.log(username, password)
     
     try {
-    
         const result = await prisma.user.findFirst({
             where:{
                 name: username,
-                password: password
-            },
-            orderBy:{
-                id:'desc',
+                //password: password
             }
         });
 
+        const plaintext = CryptoJS.AES.decrypt(result.password ,secretKey).toString(CryptoJS.enc.Utf8)
+        console.log(plaintext);
+        
         console.log(result);
-        if(result){
+        if(password === plaintext){
             const token = sign({ id: result.id, username: result.name, role: result.role }, secretKey, { expiresIn: "1hr" })
             const user = await prisma.user.update({
                 where: {
