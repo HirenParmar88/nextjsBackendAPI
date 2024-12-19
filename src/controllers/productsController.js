@@ -1,6 +1,7 @@
 //import client from "./../../db.js";
 import { PrismaClient } from "@prisma/client";
 const prisma=new PrismaClient();
+import {authSchemaProduct,updateSchemaProduct} from '../validation/productValidation.js'
 
 //app.get /product
 const getProduct=async (req, res) => {
@@ -14,8 +15,15 @@ const getProduct=async (req, res) => {
       const result = await prisma.product.findMany({
         skip:offset,
         take:limit,
+        select:{
+          id: true,
+          product_name: true,
+          price: true,
+          description: true,
+          userId: true
+        },
         orderBy:{
-          id: 'desc',
+          id: 'asc',
         },
       }) // Fetch paginated products
       // Send response
@@ -35,25 +43,21 @@ const getProduct=async (req, res) => {
 
 //app.post /product
 const addProduct= async (req, res) => {
-    const {product_name, description, price}= req.body;
-    if(!product_name || !description || !price){
-      return res.status(400).json({error: "error message !!"})
+  console.log("Add product data ", req.body);  
+  try {
+    const validProduct = await authSchemaProduct.validateAsync(req.body);
+    console.log("product test :",validProduct);
+    console.log(validProduct.userId);
+    
+    if (!validProduct.userId) {
+      return res.status(400).json({ error: "User ID is required" });
     }
-    try {
-      // const user=await prisma.user.findFirst({
-      //     where:{
-      //         id: req.user.id
-      //       },
-      //     select:{
-      //         id:true,
-      //       }
-      // })
       const result = await prisma.product.create({
         data:{
-          product_name:product_name,
-          price:price,
-          description: description,
-          userId: req.user.id
+          product_name: validProduct.product_name,
+          price: validProduct.price,
+          description: validProduct.description,
+          userId: validProduct.userId
         }
       })
       return res.json({
@@ -63,31 +67,37 @@ const addProduct= async (req, res) => {
         total : result.rowCount
       });
     } catch (err) {
+      if(err.isJoi === true){
+        res.status(422).json({message:"enter valid details"})
+        console.log("enter valid detail of products");
+        return;
+      }
       console.error("Error adding products:", err);
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err });
     }
   }
 
 //app.put /product
 const updProduct= async (req,res)=>{
-    const id = req.query.id
-    const{ product_name, price, description }=req.body;
-    if(!product_name || !id || price || description){
-
-      //
-    }
-    console.log("id and productName ", id, product_name)
+    console.log("update product...");
+    const ID =  req.params.id;
     try{
-      const updateProduct= await prisma.product.update({
+    const updateProductValidate= await updateSchemaProduct.validateAsync(req.body)
+    console.log("update product validated :",updateProductValidate);
+    console.log("req id :",req.id);
+    
+     const updateProduct= await prisma.product.update({
         where:{
-          id: parseInt(id)
+          id: Number(ID)
         },
         data:{
-          product_name:product_name,
-          price:price,
-          description:description
+          product_name: updateProductValidate.product_name,
+          price: updateProductValidate.price,
+          description: updateProductValidate.description
         }
       })
+      console.log("updated product details :",updateProduct);
+      
       return res.json({ 
         code : 200,
         success : true,
@@ -95,7 +105,14 @@ const updProduct= async (req,res)=>{
         total : updateProduct.rowCount
       });
     }catch(err){
-      console.error('error to update products...',err);
+      //console.error('error to update products...',err);
+      if(err.isJoi === true){
+        res.status(422).json({message:"enter valid details"})
+        console.log("enter valid detail of update products");
+        return;
+      }
+      console.error("Error Updating products:", err);
+      return res.status(500).json({ error: err });
     }
   }
   

@@ -9,26 +9,41 @@ import CryptoJS from "crypto-js";
 
 //GET Apis 
 const login=async(req,res)=>{
-    const { username, password} = req.body;
-    console.log('log in APIS ..',req.body)
-    //console.log('username :', username)
-    //console.log('password :', password)
-    
-    console.log(username, password)
-    
     try {
+    const { username, password} = req.body; //destructuring
+    console.log('log in APIS ..',req.body)
+
+    //console.log(username, password)
+    if (!username || !password) {
+        console.log("Username and password are required.");
+        return res.status(400).json({
+            code: 400,
+            success: false,
+            message: 'Username and password are required.',
+        });
+    }
         const result = await prisma.user.findFirst({
             where:{
                 name: username,
                 //password: password
             }
         });
-
+        //console.log("result", result);
+        if (!result) {
+            console.log("User not found.");
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: 'Invalid username or password',
+            });
+        }
+        // decrypt password
         const plaintext = CryptoJS.AES.decrypt(result.password ,secretKey).toString(CryptoJS.enc.Utf8)
+        console.log(plaintext);
         
-        console.log(result);
+        //console.log(result);
         if(password === plaintext){
-            const token = sign({ id: result.id, username: result.name, role: result.role }, secretKey, { expiresIn: "1hr" })
+            const token = sign({ id: result.id, username: result.name, role: result.role }, secretKey, { expiresIn: "5hr" })
             const user = await prisma.user.update({
                 where: {
                     id: result.id
@@ -46,7 +61,7 @@ const login=async(req,res)=>{
               });
               
         }else{
-            console.log("unauthorized users !!")
+            //console.log("unauthorized users !!")
             return res.json({
                 code: 400,
                 success: false,

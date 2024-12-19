@@ -1,8 +1,11 @@
 
 //import client from './../../db.js';
 import { PrismaClient } from "@prisma/client";
+import {authSchemaAccessories, updateSchemaAccessories} from '../validation/accessoriesValidation.js'
+import { error } from "console";
 const prisma=new PrismaClient();
 
+// Get Accessories
 const getAccessories= async(req,res)=>{
     const page=parseInt(req.query.page) || 1;
     const limit=parseInt(req.query.limit) || 10;
@@ -33,17 +36,23 @@ const getAccessories= async(req,res)=>{
     }
   }
 
+// Add Assessories
 const addAccessories= async (req, res) => {
-    const {accessory_name, product_id }= req.body;
-    
-    if(!accessory_name || product_id ){
-      console.log('accessories name and product id is required !!')
+  console.log("aaaaa");
+  try {
+    console.log("body data :",req.body);
+    const validAccessories = await authSchemaAccessories.validateAsync(req.body)
+    console.log("Accessories Test : ",validAccessories)
+    console.log('ss');
+    console.log(validAccessories.product_id);
+  
+    if(!validAccessories.product_id ){
+      console.log('product id is required !!')
     }
-    try {
       const result = await prisma.accessory.create({
         data:{
-          name:accessory_name,
-          productId:parseInt(product_id)
+          name: validAccessories.accessory_name,
+          productId: validAccessories.product_id
         }
       })
       console.log(result)
@@ -51,31 +60,36 @@ const addAccessories= async (req, res) => {
       return res.json({
         code : 200,
         success : true,
-        message: 'accessory added'
+        message: 'accessory added success.'
       });
     } catch (err) {
       console.error("Error adding accessories:", err);
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err.details[0].message });
     }
   }
 
+// Update Product
 const updateAccessories= async(req,res)=>{
-    const id=req.query.id;
-    const{ accessory_name }=req.body;
-    if(!id || !accessory_name ){
-      //
-    }
-    console.log('id and accessory_name',id,accessory_name);
-    try{
+  console.log("update accessories ..");
+  const AccessoryID=req.params.id;
+  console.log("req.params.id :- ",AccessoryID);
+  try{
+    const validatedAccessories = await updateSchemaAccessories.validateAsync(req.body)
+    console.log("updated Accessories :-", validatedAccessories);
+    //console.log(req.id);
+    console.log("sssssss");
+  
       const updateAccessories= await prisma.accessory.update({
         where:{
-          id,
+          id: AccessoryID
         },
         data:{
-          name:accessory_name,
+          name: validatedAccessories.accessory_name,
           //productId:product_id,
         }
       })
+      console.log("Updated Accessories :",updateAccessories);
+      
       return res.json({ 
         code : 200,
         success : true,
@@ -86,7 +100,8 @@ const updateAccessories= async(req,res)=>{
       console.error('error to update assessories...',err);
     }
   }
-  
+
+//delete accessories
 const deleteAccessories= async(req,res)=>{
     console.log('parameter deleted:',req.params);
     const { id } = req.params;

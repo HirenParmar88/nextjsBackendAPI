@@ -4,14 +4,9 @@ import verifyToken from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// router.get('/',verifyToken, getProduct)
-// router.post('/',verifyToken, addProduct)
-// router.put('/',verifyToken, updProduct)
-// router.delete('/:id',verifyToken, deleteProducts)
-
 router.get('/', verifyToken, getProduct)
 router.post('/', verifyToken, addProduct)
-router.put('/', verifyToken, updProduct)
+router.put('/:id', verifyToken, updProduct)
 router.delete('/:id', verifyToken, deleteProducts)
 
 

@@ -5,9 +5,9 @@ import jwt from 'jsonwebtoken'; //ES7
 const {verify,decode,sign} = jwt;
 import { secretKey } from '../utils/constant.js';
 import CryptoJS from "crypto-js";
+import {authSchema,updateSchema} from '../validation/userValidation.js'
 
 //GET User usign Prisma
-
 const getUsers = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -21,12 +21,17 @@ const getUsers = async (req, res) => {
     const result = await prisma.user.findMany({
       skip: offset,
       take: limit,
+      select: {
+        id: true,
+        name: true,
+        email: true
+      },
       orderBy:{
-        id:'desc',
+        id:'asc',
       }
       
     });
-    //console.log(result);
+    console.log(result);
 
     return res.json({
       currentPage: page,
@@ -45,19 +50,17 @@ const getUsers = async (req, res) => {
 // Add Users Back-End APIs
 const addUsers = async (req, res) => {
   console.log(req.body);
-  
-  const { username, email, password} = req.body;  
-  const cipherText = CryptoJS.AES.encrypt(password,secretKey).toString()   //secretKey is key
-  console.log("cipher text", cipherText);
-  
-  if (!username || !email || !password ) {
-    console.log('username and password are required')
-    return res.status(400).json({ error: "error message !!" });
-  }
   try {
+    const body = await authSchema.validateAsync(req.body);
+    console.log("validate user Schema :",body);
+    const { username, email, password} = req.body;  
+    
+    const cipherText = CryptoJS.AES.encrypt(body.password,secretKey).toString()   //secretKey is key
+    console.log("cipher text", cipherText);
+    
     const getUser = await prisma.user.findFirst({
       where: {
-        name: username
+        name: body.username
       }     
     })
     if(getUser) {
@@ -65,12 +68,10 @@ const addUsers = async (req, res) => {
         error: "User already exists"
       })
     }
-    //const token = sign({ username: result.name, role: result.role }, secretKey, { expiresIn: "1hr" })
-
     const result = await prisma.user.create({
       data: {
-        name: username,
-        email,
+        name: body.username,
+        email: body.email,
         password: cipherText,
       },
     });
@@ -82,31 +83,39 @@ const addUsers = async (req, res) => {
       total: result.rowCount,
     });
   } catch (err) {
+      if(err.isJoi === true){
+        res.status(422).json({message:"enter valid details"})
+        console.log("enter valid detail of user");
+        return;
+      }
     console.error("Error adding user:", err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err });
   }
 };
 
 //Update Users APIs
 const upUsers = async (req, res) => {
-  const id = req.query.id;
-  const { username, email } = req.body;
-  if (!username || !id || !email) {
-    console.log('is required !!!')
-  }
-  console.log("id user email", id, username, email);  //email -> Unique
+  console.log('update users ...');
   try {
+  //console.log("body data :",req.body);
+  const updateValidateUser = await updateSchema.validateAsync(req.body)
+  console.log("updated user schema : ",updateValidateUser);
+  
     const countUpdate=await prisma.user.count();
-    const updateUsers = await prisma.user.updateMany({
+    console.log("Total Update :",countUpdate);
+    
+    const updateUsers = await prisma.user.update({
       where: {
-        id: parseInt(id)
+        id: req.id  //req.id  /users?id=219
       }, 
       data: {
-        name: username,
-        email: email
+        name: updateValidateUser.username,
+        email: updateValidateUser.email,
+        password: updateValidateUser.password
       },
     });
-
+    console.log("Updated User Details :",updateUsers);
+    
     return res.json({
       code: 200,
       success: true,
@@ -117,6 +126,12 @@ const upUsers = async (req, res) => {
     });
   } catch (err) {
     console.error("error to update users  !!", err);
+    if(err.isJoi === true){
+      res.status(422).json({message:"enter valid details"})
+      console.log("enter valid detail to update user");
+      return;
+    }
+    return res.status(500).json({ error: err });
   }
 };
 
@@ -129,12 +144,6 @@ const deleteUsers = async (req, res) => {
     console.log('id are required !!');
   }
   try {
-    // await prisma.user.deleteMany({
-    //   where:{
-    //     id:parseInt(id),
-    //   }
-    // });
-
     const delUsers = await prisma.user.deleteMany({
       where: {
         id: parseInt(id),
